@@ -7,7 +7,7 @@ from PIL import Image
 
 from app._enums import ImageMimeTypes
 from app.core.config import settings
-from app.utils.encoders import ImageEncoder
+from app.services.plate_analysis import analyze_bacterial_plate
 
 router = APIRouter(tags=["sync"])
 
