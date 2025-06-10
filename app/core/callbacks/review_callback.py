@@ -3,11 +3,8 @@ import resend
 from app._enums import Callbacks, EmailContents
 from app.core.callbacks.base import Callback
 from app.core.config import settings
-from app.models.models import CallBackExecutionResult, FilterElement, QueryFilter
+from app.models.models import CallBackExecutionResult
 from app.services.fuzzy_match import fuzzy_find_team_member
-from app.utils.sql import (
-    SQLiteSQLGenerator,
-)
 
 resend.api_key = settings.resend_api_key  # type: ignore
 
@@ -42,8 +39,7 @@ class ReviewCallback(Callback):
         Returns:
             CallBackExecutionResult: The result of the callback execution.
         """
-
-        ocred_username: str = kwargs["ne"].get("Name", "") # type: ignore
+        ocred_username: str = kwargs.get("name", "louisbrulenaudet") # type: ignore
         matched_user: dict = fuzzy_find_team_member(ocred_username) # type: ignore
 
         params: resend.Emails.SendParams = {

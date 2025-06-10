@@ -6,12 +6,13 @@ from aiocache import cached
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
-from app._enums import ImageMimeTypes
+
 from app._tools import tools
+from app._enums import Actions, Callbacks, ImageMimeTypes
 from app.core.callbacks import ReviewCallback
 from app.core.completion import CompletionModel
 from app.core.config import settings
-from app.models.models import SignDetector
+from app.models.models import SignDetectors
 from app.services.plate_analysis import analyze_bacterial_plate
 from app.utils.encoders import ImageEncoder
 from app.utils.image_processing import correct_inversion
@@ -19,8 +20,8 @@ from app.utils.image_processing import correct_inversion
 router = APIRouter(tags=["sync"])
 
 
-CALLBACKS: dict[str, ReviewCallback] = {
-    "review": ReviewCallback(),
+CALLBACKS: dict[Callbacks, ReviewCallback] = {
+    Callbacks.REVIEW: ReviewCallback(),
 }
 
 
@@ -91,14 +92,55 @@ async def completion(file: UploadFile = File(...)) -> dict:
     print(prompt, tools)
 
     model = CompletionModel(token=settings.openai_api_key)
-    result = model.generate(
-        "",
+
+    # Collect all callback values from the Callbacks enum
+    callback_values = [cb.value for cb in Callbacks]
+    actions_values = [action.value for action in Actions]
+
+    callbacks_or_tools = model.generate(
+        settings.get_rendered_prompt(
+            "sign_detector_prompt",
+            {"actions": actions_values, "types": callback_values},
+        ),
         images=[f"data:{file.content_type};base64,{image_b64}"],
         system_instruction=prompt,
         tools=tools,
     )
 
+
     print(result)
+
+    
+
+
+
+    for element in callbacks_or_tools.data.get("signs", []):
+        if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
+            callback_name = element.get("name")
+            if callback_name in CALLBACKS:
+                parameters = element.get("parameters", {})
+                parameters.update(
+                    {
+                        "data": "Ceci est le contenu d'un test.",
+                    }
+                )
+
+                callback = CALLBACKS[callback_name]
+                result = callback.execute(
+                    **parameters
+                )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Callback {callback_name} not found.",
+                )
+        else:
+            # Optionally log or skip non-dict elements
+            continue
+
+
+    print(result.data)
+
     return {"data": result.data}
 
 
