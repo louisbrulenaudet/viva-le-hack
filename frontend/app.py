@@ -45,7 +45,7 @@ def send_image_to_api(image: Image.Image) -> dict:
 
 
 example_images: list[str] = [
-    "https://pub-6c7e4dfe67f8438aaf1ccba97c8a82be.r2.dev/colonies/b0da65d6-5866-42b9-bd1e-f0310ff20738.jpg"
+    "https://pub-6c7e4dfe67f8438aaf1ccba97c8a82be.r2.dev/colonies/545da220-b25e-47db-929a-a5f3eeaf4436.jpg"
 ]
 
 iface: gr.Interface = gr.Interface(
