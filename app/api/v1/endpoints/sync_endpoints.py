@@ -6,9 +6,8 @@ from aiocache import cached
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
-
-from app._tools import tools
 from app._enums import Actions, Callbacks, ImageMimeTypes
+from app._tools import tools
 from app.core.callbacks import ReviewCallback
 from app.core.completion import CompletionModel
 from app.core.config import settings
@@ -73,46 +72,15 @@ async def completion(file: UploadFile = File(...)) -> dict:
     image.save(buf, format="PNG")
     image_b64 = base64.b64encode(buf.getvalue()).decode()
 
-    # prompt = settings.get_rendered_prompt("sign_detector")
-
-    # model = CompletionModel(token=settings.openai_api_key)
-    # result = model.generate(
-    #     "",
-    #     images=[f"data:{file.content_type};base64,{image_b64}"],
-    #     response_format=SignDetector,
-    #     system_instruction=prompt,
-    # )
-
-    # ReviewCallback().execute(
-    #     **result.data
-    # )
-
-    prompt = settings.get_rendered_prompt("colony_analyzer")
-
-    print(prompt, tools)
+    prompt = settings.get_rendered_prompt("sign_detector")
 
     model = CompletionModel(token=settings.openai_api_key)
-
-    # Collect all callback values from the Callbacks enum
-    callback_values = [cb.value for cb in Callbacks]
-    actions_values = [action.value for action in Actions]
-
     callbacks_or_tools = model.generate(
-        settings.get_rendered_prompt(
-            "sign_detector_prompt",
-            {"actions": actions_values, "types": callback_values},
-        ),
+        "",
         images=[f"data:{file.content_type};base64,{image_b64}"],
+        response_format=SignDetectors,
         system_instruction=prompt,
-        tools=tools,
     )
-
-
-    print(result)
-
-    
-
-
 
     for element in callbacks_or_tools.data.get("signs", []):
         if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
@@ -126,9 +94,7 @@ async def completion(file: UploadFile = File(...)) -> dict:
                 )
 
                 callback = CALLBACKS[callback_name]
-                result = callback.execute(
-                    **parameters
-                )
+                result = callback.execute(**parameters)
             else:
                 raise HTTPException(
                     status_code=400,
@@ -137,6 +103,23 @@ async def completion(file: UploadFile = File(...)) -> dict:
         else:
             # Optionally log or skip non-dict elements
             continue
+
+
+    # prompt = settings.get_rendered_prompt("colony_analyzer")
+
+    # print(prompt, tools)
+
+    # model = CompletionModel(token=settings.openai_api_key)
+
+    # callbacks_or_tools = model.generate(
+    #     prompt,
+    #     images=[f"data:{file.content_type};base64,{image_b64}"],
+    #     system_instruction=prompt,
+    #     tools=tools,
+    # )
+
+    # print(result)
+
 
 
     print(result.data)
