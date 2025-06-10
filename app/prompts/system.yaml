@@ -8,14 +8,26 @@ sign_detector: |-
     It must match exactly one of: review, db, bucket.
   • Every following line contains a key and its value in the "key: value" format.
 
+  list of possible callbacks:
+  {{callbacks|safe}}
+
+  list of possible types:
+  {{types|safe}}
+
   For every shape you detect, return a JSON object in the following form:
 
-  {
-    "type": "<callback|tools>",
-    "shape": "<rectangle|round>",
-    "name": "<callback name from the first line, one of: review | db | bucket>",
-    "ne": { "<key1>": "<value1>", "<key2>": "<value2>", ... }
-  }
+  ```json
+  signs: [
+    {
+      "type": "<callback|tools>",
+      "name": "<callback name from the first line in lowercase and without spaces>",
+      "parameters": { "<key1>": "<value1>", "<key2>": "<value2>", ... }
+    }
+  ]
+  ```
 
   If the image contains multiple shapes, return a JSON array of such objects.
   Only return JSON that conforms to this format.
+
+sign_detector_prompt: |-
+  Analyse this image and return the callbacks and parameters in the specified format.

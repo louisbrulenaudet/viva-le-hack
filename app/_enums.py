@@ -15,6 +15,11 @@ class ImageMimeTypes(enum.StrEnum):
     PNG = "image/png"
 
 
+class Actions(enum.StrEnum):
+    TOOL = "tool"
+    CALLBACK = "callback"
+
+
 class Callbacks(enum.StrEnum):
     REVIEW = "review"
     DB = "db"

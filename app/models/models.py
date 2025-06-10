@@ -1,10 +1,14 @@
 from datetime import datetime
-from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app._enums import ColonyOriginHypothesis, SpatialDistributionType, Callbacks
+from app._enums import (
+    Actions,
+    Callbacks,
+    ColonyOriginHypothesis,
+    SpatialDistributionType,
+)
 
 __all__: list[str] = [
     "Completion",
@@ -54,17 +58,16 @@ class QueryFilter(BaseModel):
     group_by: list[str] = Field(default_factory=list)
 
 
-class SignDetectorType(str, Enum):
-    callback = "callback"
-    tools = "tools"
-
-
 class SignDetector(BaseModel):
     """Model returned by the SignDetector prompt."""
 
-    type: SignDetectorType = Field(description="Type of the detected object: callback or tools")
+    type: Actions = Field(description="Type of the detected object: callback or tools")
     name: Callbacks = Field(description="First line inside the shape")
-    ne: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
+    parameters: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
+
+
+class SignDetectors(BaseModel):
+    signs: list[SignDetector]
 
 
 class ColonyGroup(BaseModel):
