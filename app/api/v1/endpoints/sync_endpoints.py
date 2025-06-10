@@ -7,7 +7,7 @@ from PIL import Image
 
 from app._enums import ImageMimeTypes
 from app.core.config import settings
-from app.utils.encoders import ImageEncoder
+from app.utils.image_processing import correct_inversion
 
 router = APIRouter(tags=["sync"])
 
@@ -54,9 +54,7 @@ async def completion(file: UploadFile = File(...)) -> dict:
 
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
-    b64_img: str = ImageEncoder().encode_image_to_base64(image)
-
-    print(b64_img)
+    image, _ = correct_inversion(image)
 
     # settings.r2_client.upload_fileobj(  # type: ignore
     #     Fileobj=BytesIO(json.dumps(...).encode("utf-8")),
