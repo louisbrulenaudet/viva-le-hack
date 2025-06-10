@@ -8,6 +8,7 @@ from PIL import Image
 
 from app._enums import ImageMimeTypes
 from app.core.completion import CompletionModel
+from app.core.callbacks import ReviewCallback
 from app.core.config import settings
 from app.models.models import SignDetector
 from app.utils.image_processing import correct_inversion
@@ -73,7 +74,22 @@ async def completion(file: UploadFile = File(...)) -> dict:
         system_instruction=prompt,
     )
 
+    params = {
+        "username": "thibaultguillemat",
+    }
+
+    params.update(
+        {
+            "data": "Ceci est le contenu d'un test.",
+        }
+    )
+
+    ReviewCallback().execute(
+        **params
+    )
+
     return {"data": result.data}
+
 
     # settings.r2_client.upload_fileobj(  # type: ignore
     #     Fileobj=BytesIO(json.dumps(...).encode("utf-8")),

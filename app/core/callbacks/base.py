@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app._enums import Callback as CallbackEnum
+from app._enums import Callbacks
 
 
 class Callback(Protocol):
@@ -13,6 +13,6 @@ class Callback(Protocol):
     and returns a AgentExecutionResult. Each callback must have a `name` attribute from the Callbacks enum.
     """
 
-    name: CallbackEnum
+    name: Callbacks
 
     def __init__(self, *args: object, **kwargs: object) -> None: ...
