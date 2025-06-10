@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app._enums import ColonyOriginHypothesis, SpatialDistributionType
+from app._enums import ColonyOriginHypothesis, SpatialDistributionType, Callbacks
 
 __all__: list[str] = [
     "Completion",
@@ -63,7 +63,7 @@ class SignDetector(BaseModel):
     """Model returned by the SignDetector prompt."""
 
     type: SignDetectorType = Field(description="Type of the detected object: callback or tools")
-    name: str = Field(description="First line inside the shape")
+    name: Callbacks = Field(description="First line inside the shape")
     ne: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
 
 
