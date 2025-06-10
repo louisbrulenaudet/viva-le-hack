@@ -1,3 +1,4 @@
+import base64
 import io
 import time
 
@@ -6,7 +7,9 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
 from app._enums import ImageMimeTypes
+from app.core.completion import CompletionModel
 from app.core.config import settings
+from app.models.models import SignDetector
 from app.utils.image_processing import correct_inversion
 
 router = APIRouter(tags=["sync"])
@@ -56,11 +59,25 @@ async def completion(file: UploadFile = File(...)) -> dict:
     image = Image.open(io.BytesIO(contents))
     image, _ = correct_inversion(image)
 
+    buf = io.BytesIO()
+    image.save(buf, format="PNG")
+    image_b64 = base64.b64encode(buf.getvalue()).decode()
+
+    prompt = settings.get_rendered_prompt("sign_detector")
+
+    model = CompletionModel(token=settings.openai_api_key)
+    result = model.generate(
+        "",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        response_format=SignDetector,
+        system_instruction=prompt,
+    )
+
+    return {"data": result.data}
+
     # settings.r2_client.upload_fileobj(  # type: ignore
     #     Fileobj=BytesIO(json.dumps(...).encode("utf-8")),
     #     Bucket="openai-viva-le-hack",
     #     Key="/name_of_the_file.json",
     #     ExtraArgs={"ContentType": "application/json"},
     # )
-
-    return {"data": {"success": True, "message": "File processed successfully"}}

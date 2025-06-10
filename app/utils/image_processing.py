@@ -7,8 +7,8 @@ __all__ = ["detect_inverted", "correct_inversion"]
 
 def detect_inverted(image: Image.Image) -> bool:
     """Return True if the image orientation is horizontally flipped."""
-    # orientation = image.getexif().get(274)  # Orientation tag
-    return True
+    orientation = image.getexif().get(274)
+    return orientation == 2
 
 
 def correct_inversion(image: Image.Image) -> tuple[Image.Image, bool]:

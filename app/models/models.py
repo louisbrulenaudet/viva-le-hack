@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 __all__: list[str] = [
     "Completion",
     "RoutingResponse",
-    "AgentExecutionResult",
+    "SignDetector",
 ]
 
 
@@ -51,3 +51,11 @@ class QueryFilter(BaseModel):
     limit: int | None = None
     distinct: bool = False
     group_by: list[str] = Field(default_factory=list)
+
+
+class SignDetector(BaseModel):
+    """Model returned by the SignDetector prompt."""
+
+    shape: str = Field(description="Detected shape: rectangle or round")
+    name: str = Field(description="First line inside the shape")
+    ne: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
