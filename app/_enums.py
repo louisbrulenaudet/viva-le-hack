@@ -25,7 +25,7 @@ class Callbacks(enum.StrEnum):
 
 
 class Models(enum.StrEnum):
-    GPT_4_TURBO = "gpt-4-turbo"
+    GPT_4_1_MINI = "gpt-4.1-mini"
 
 
 class ErrorCodes(enum.StrEnum):
