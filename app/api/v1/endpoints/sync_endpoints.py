@@ -93,6 +93,16 @@ async def completion(file: UploadFile = File(...)) -> dict:
 
     model = CompletionModel(token=settings.openai_api_key)
 
+    result = model.generate(
+        "",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        system_instruction=prompt,
+        tools=tools
+    )
+
+    print(result)
+
+
     # Collect all callback values from the Callbacks enum
     callback_values = [cb.value for cb in Callbacks]
     actions_values = [action.value for action in Actions]
@@ -109,9 +119,6 @@ async def completion(file: UploadFile = File(...)) -> dict:
 
 
     print(result)
-
-    
-
 
 
     for element in callbacks_or_tools.data.get("signs", []):
