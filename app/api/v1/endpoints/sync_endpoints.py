@@ -7,6 +7,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
 from app._enums import ImageMimeTypes
+from app._tools import tools
 from app.core.callbacks import ReviewCallback
 from app.core.completion import CompletionModel
 from app.core.config import settings
@@ -71,26 +72,40 @@ async def completion(file: UploadFile = File(...)) -> dict:
     image.save(buf, format="PNG")
     image_b64 = base64.b64encode(buf.getvalue()).decode()
 
-    prompt = settings.get_rendered_prompt("sign_detector")
+    # prompt = settings.get_rendered_prompt("sign_detector")
 
-    model = CompletionModel(token=settings.openai_api_key)
-    result = model.generate(
-        "",
-        images=[f"data:{file.content_type};base64,{image_b64}"],
-        response_format=SignDetector,
-        system_instruction=prompt,
-    )
+    # model = CompletionModel(token=settings.openai_api_key)
+    # result = model.generate(
+    #     "",
+    #     images=[f"data:{file.content_type};base64,{image_b64}"],
+    #     response_format=SignDetector,
+    #     system_instruction=prompt,
+    # )
 
     # ReviewCallback().execute(
     #     **result.data
     # )
 
+    prompt = settings.get_rendered_prompt("colony_analyzer")
+
+    print(prompt, tools)
+
+    model = CompletionModel(token=settings.openai_api_key)
+    result = model.generate(
+        "",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        system_instruction=prompt,
+        tools=tools,
+    )
+
+    print(result)
     return {"data": result.data}
 
 
     # settings.r2_client.upload_fileobj(  # type: ignore
     #     Fileobj=BytesIO(json.dumps(...).encode("utf-8")),
-    #     Bucket="openai-viva-le-hack",
+    #     Bucket=
+    # "openai-viva-le-hack",
     #     Key="/name_of_the_file.json",
     #     ExtraArgs={"ContentType": "application/json"},
     # )

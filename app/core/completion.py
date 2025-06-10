@@ -43,6 +43,7 @@ class CompletionModel:
         reasoning_effort: str | None = None,
         images: list | None = None,
         response_format: type[BaseModel] | None = None,
+        tools: list | None = None,
     ) -> Completion | None:
         """Generate a completion using OpenAI's chat API."""
 
@@ -69,6 +70,9 @@ class CompletionModel:
 
         if response_format is not None:
             params["response_format"] = {"type": "json_object"}
+
+        if tools is not None:
+            params["tools"] = tools
 
         response = self.client.chat.completions.create(**params)
         content: str = response.choices[0].message.content or ""
