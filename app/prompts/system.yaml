@@ -29,6 +29,10 @@ sign_detector: |-
   If the image contains multiple shapes, return a JSON array of such objects.
   Only return JSON that conforms to this format.
 
+
+sign_detector_prompt: |-
+  Analyse this image and return the callbacks and parameters in the specified format.
+
 colony_analyzer: |-
   You are an expert microbiologist analyzing bacterial colony growth patterns on agar plates. When provided with an image of a bacterial culture plate, conduct a comprehensive analysis using the available tools.
 
