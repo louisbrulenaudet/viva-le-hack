@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 
 from openai import OpenAI
@@ -46,7 +47,6 @@ class CompletionModel:
         tools: list | None = None,
     ) -> Completion | None:
         """Generate a completion using OpenAI's chat API."""
-
         messages: list[dict] = [
             {"role": "system", "content": system_instruction or self.system_instruction}
         ]
@@ -74,11 +74,39 @@ class CompletionModel:
         if tools is not None:
             params["tools"] = tools
 
-        response = self.client.chat.completions.create(**params)
-        content: str = response.choices[0].message.content or ""
+        try:
+            response = self.client.chat.completions.create(**params)
 
-        if response_format is not None:
-            parsed = response_format.model_validate_json(content)
-            return Completion(data=parsed.model_dump())
+            # Handle tool calls if present
+            if response.choices[0].message.tool_calls:
+                tool_calls_data = []
+                for tool_call in response.choices[0].message.tool_calls:
+                    tool_call_info = {
+                        "id": tool_call.id,
+                        "function": {
+                            "name": tool_call.function.name,
+                            "arguments": json.loads(tool_call.function.arguments)
+                        }
+                    }
+                    tool_calls_data.append(tool_call_info)
 
-        return Completion(data=content)
+                return Completion(data={
+                    "tool_calls": tool_calls_data,
+                    "content": response.choices[0].message.content
+                })
+
+            # Handle regular content response
+            content: str = response.choices[0].message.content or ""
+
+            if response_format is not None and content:
+                parsed = response_format.model_validate_json(content)
+                return Completion(data=parsed.model_dump())
+
+
+            print(content)
+
+            return Completion(data=content)
+
+        except Exception as e:
+            print(f"Error processing OpenAI response: {e}")
+            return Completion(data="")

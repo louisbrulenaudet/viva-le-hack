@@ -72,59 +72,54 @@ async def completion(file: UploadFile = File(...)) -> dict:
     image.save(buf, format="PNG")
     image_b64 = base64.b64encode(buf.getvalue()).decode()
 
-    prompt = settings.get_rendered_prompt("sign_detector")
-
-    model = CompletionModel(token=settings.openai_api_key)
-    callbacks_or_tools = model.generate(
-        "",
-        images=[f"data:{file.content_type};base64,{image_b64}"],
-        response_format=SignDetectors,
-        system_instruction=prompt,
-    )
-
-    for element in callbacks_or_tools.data.get("signs", []):
-        if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
-            callback_name = element.get("name")
-            if callback_name in CALLBACKS:
-                parameters = element.get("parameters", {})
-                parameters.update(
-                    {
-                        "data": "Ceci est le contenu d'un test.",
-                    }
-                )
-
-                callback = CALLBACKS[callback_name]
-                result = callback.execute(**parameters)
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Callback {callback_name} not found.",
-                )
-        else:
-            # Optionally log or skip non-dict elements
-            continue
-
-
-    # prompt = settings.get_rendered_prompt("colony_analyzer")
-
-    # print(prompt, tools)
+    # prompt = settings.get_rendered_prompt("sign_detector")
 
     # model = CompletionModel(token=settings.openai_api_key)
-
     # callbacks_or_tools = model.generate(
-    #     prompt,
+    #     "",
     #     images=[f"data:{file.content_type};base64,{image_b64}"],
+    #     response_format=SignDetectors,
     #     system_instruction=prompt,
-    #     tools=tools,
     # )
 
-    # print(result)
+    # for element in callbacks_or_tools.data.get("signs", []):
+    #     if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
+    #         callback_name = element.get("name")
+    #         if callback_name in CALLBACKS:
+    #             parameters = element.get("parameters", {})
+    #             parameters.update(
+    #                 {
+    #                     "data": "Ceci est le contenu d'un test.",
+    #                 }
+    #             )
+
+    #             callback = CALLBACKS[callback_name]
+    #             result = callback.execute(**parameters)
+    #         else:
+    #             raise HTTPException(
+    #                 status_code=400,
+    #                 detail=f"Callback {callback_name} not found.",
+    #             )
+    #     else:
+    #         # Optionally log or skip non-dict elements
+    #         continue
 
 
+    prompt = settings.get_rendered_prompt("colony_analyzer")
 
-    print(result.data)
+    model = CompletionModel(token=settings.openai_api_key)
 
-    return {"data": result.data}
+    analysis = model.generate(
+        prompt,
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        system_instruction=prompt,
+        tools=tools,
+    )
+
+
+    print(analysis.data)
+
+    return {"data": analysis.data}
 
 
     # settings.r2_client.upload_fileobj(  # type: ignore
