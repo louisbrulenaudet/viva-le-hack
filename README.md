@@ -1,5 +1,7 @@
 # Viva le Hack Backend
 
+![Champ illustration](./assets/champ-img.png)
+
 Production-ready FastAPI backend with Pydantic validation, Dramatiq workers, and Redis integration.
 
 ---
