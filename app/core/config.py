@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     name: str = Field(default="JSON-ld", alias="APP_NAME")
     service_start_time: float = Field(default_factory=time.time, exclude=True)
-    model_names: list[Models] = [Models.GPT_4_TURBO, Models.GPT_4_TURBO]
+    model_names: list[Models] = [Models.GPT_4_1_MINI, Models.GPT_4_1_MINI]
     model_base_url: str | None = Field(
         default=None,
         alias="MODEL_BASE_URL",

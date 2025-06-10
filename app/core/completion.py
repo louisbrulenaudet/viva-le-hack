@@ -18,7 +18,7 @@ class CompletionModel:
     def __init__(
         self,
         token: str | None = None,
-        model_name: Models = Models.GPT_4_TURBO,
+        model_name: Models = Models.GPT_4_1_MINI,
         temperature: float = 0,
         base_url: str | None = None,
         system_instruction: str = "You are a helpful assistant.",
@@ -37,7 +37,7 @@ class CompletionModel:
     def generate(
         self,
         prompt: str,
-        model_name: Models = Models.GPT_4_TURBO,
+        model_name: Models = Models.GPT_4_1_MINI,
         system_instruction: str | None = None,
         thinking_budget: int | None = None,
         reasoning_effort: str | None = None,
@@ -54,8 +54,9 @@ class CompletionModel:
             user_content: list[dict] = []
             if prompt:
                 user_content.append({"type": "text", "text": prompt})
+
             for img in images:
-                user_content.append({"type": "image_url", "image_url": img})
+                user_content.append({"type": "image_url", "image_url": {"url": img}})
             messages.append({"role": "user", "content": user_content})
         else:
             messages.append({"role": "user", "content": prompt})
