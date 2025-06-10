@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from app._enums import Models
 from app.models.models import Completion
 from app.utils.decorators import retry
+from app.utils.logger import logger
 
 __all__ = ["CompletionModel"]
 
@@ -85,15 +86,17 @@ class CompletionModel:
                         "id": tool_call.id,
                         "function": {
                             "name": tool_call.function.name,
-                            "arguments": json.loads(tool_call.function.arguments)
-                        }
+                            "arguments": json.loads(tool_call.function.arguments),
+                        },
                     }
                     tool_calls_data.append(tool_call_info)
 
-                return Completion(data={
-                    "tool_calls": tool_calls_data,
-                    "content": response.choices[0].message.content
-                })
+                return Completion(
+                    data={
+                        "tool_calls": tool_calls_data,
+                        "content": response.choices[0].message.content,
+                    }
+                )
 
             # Handle regular content response
             content: str = response.choices[0].message.content or ""
@@ -102,11 +105,11 @@ class CompletionModel:
                 parsed = response_format.model_validate_json(content)
                 return Completion(data=parsed.model_dump())
 
-
-            print(content)
-
             return Completion(data=content)
 
         except Exception as e:
-            print(f"Error processing OpenAI response: {e}")
+            logger.error(
+                f"Error generating completion: {e}",
+                exc_info=True,
+            )
             return Completion(data="")

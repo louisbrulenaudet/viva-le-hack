@@ -39,12 +39,15 @@ class ReviewCallback(Callback):
         Returns:
             CallBackExecutionResult: The result of the callback execution.
         """
-        ocred_username: str = kwargs.get("name", "louisbrulenaudet") # type: ignore
-        matched_user: dict = fuzzy_find_team_member(ocred_username) # type: ignore
+        ocred_username: str = kwargs.get("name", "louisbrulenaudet")  # type: ignore
+        matched_user: dict = fuzzy_find_team_member(ocred_username)  # type: ignore
 
         params: resend.Emails.SendParams = {
             "from": "Laboratory <contact@louisbrulenaudet.com>",
-            "to": [matched_user.get("email", "contact@louisbrulenaudet.com"), "louisbrulenaudet@icloud.com"],
+            "to": [
+                matched_user.get("email", "contact@louisbrulenaudet.com"),
+                "louisbrulenaudet@icloud.com",
+            ],
             "subject": "A new review request has been assigned to you",
             "html": EmailContents.REVIEW_REQUEST.format(
                 data=kwargs.get("data", ""),

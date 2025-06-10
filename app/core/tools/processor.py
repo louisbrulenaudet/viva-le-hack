@@ -35,4 +35,6 @@ class ToolProcessor:
         elif function_name == "compute_shannon_index":
             return compute_shannon_index(function_args.get("colony_groups", []))
         else:
-            return json.dumps({"error": "Unknown function", "function_name": function_name})
+            return json.dumps(
+                {"error": "Unknown function", "function_name": function_name}
+            )

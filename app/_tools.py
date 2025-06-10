@@ -1,4 +1,4 @@
-from app._enums import SpatialDistributionType
+from app._enums import ColonyColor, ColonyOriginHypothesis, SpatialDistributionType
 
 tools = [
     {
@@ -9,33 +9,13 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "image_url": {
+                    "distribution": {
                         "type": "string",
-                        "description": "The URL of the image to analyze.",
-                    },
-                    "context_for_distribution": {
-                        "type": "string",
-                        "description": "Brief context or aspect of distribution to focus on.",
+                        "enum": [d.value for d in SpatialDistributionType],
+                        "description": f"The distribution of colonies on the plate. Can be one of: {', '.join([d.value for d in SpatialDistributionType])}.",
                     },
                 },
-                "required": ["image_url", "context_for_distribution"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "detect_swarming_behavior",
-            "description": "Detect swarming behavior on the plate.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "image_url": {
-                        "type": "string",
-                        "description": "The URL of the image to analyze.",
-                    }
-                },
-                "required": ["image_url"],
+                "required": ["distribution"],
             },
         },
     },
@@ -47,16 +27,14 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "image_url": {
+                    "color": {
                         "type": "string",
-                        "description": "The URL of the image to analyze.",
-                    },
-                    "colony_area_description": {
-                        "type": "string",
-                        "description": "Description of the colony area to analyze.",
+                        "enum": [c.value for c in ColonyColor],
+                        "description": "The RGB color value to analyze. Can be  one of: "
+                        + ", ".join([c.value for c in ColonyColor]),
                     },
                 },
-                "required": ["image_url", "colony_area_description"],
+                "required": ["color"],
             },
         },
     },
@@ -68,17 +46,14 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "distribution_type": {
+                    "origin": {
                         "type": "string",
-                        "enum": [d.value for d in SpatialDistributionType],
-                        "description": "Observed spatial distribution type.",
-                    },
-                    "morphotype_description": {
-                        "type": "string",
-                        "description": "Description of dominant colony morphotype.",
+                        "enum": [d.value for d in ColonyOriginHypothesis],
+                        "description": "Observed colony origin hypothesis. Can be one of: "
+                        + ", ".join([d.value for d in ColonyOriginHypothesis]),
                     },
                 },
-                "required": ["distribution_type", "morphotype_description"],
+                "required": ["origin"],
             },
         },
     },

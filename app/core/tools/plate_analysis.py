@@ -1,65 +1,33 @@
 import json
 import math
 
-from app._enums import ColonyOriginHypothesis, SpatialDistributionType
-
 __all__: list[str] = [
     "analyze_colony_distribution",
-    "detect_swarming_behavior",
     "average_colony_rgb",
     "infer_origin_hypothesis",
     "compute_shannon_index",
 ]
 
 
-def analyze_colony_distribution(image_url: str, context_for_distribution: str) -> str:
+def analyze_colony_distribution(distribution: str) -> str:
     """Mock analysis of colony distribution on a plate image."""
-    determined_distribution = SpatialDistributionType.CLUSTERED
-    return json.dumps(
-        {
-            "image_url_processed": image_url,
-            "distribution_type": determined_distribution.value,
-            "comment": f"Distribution assessed as {determined_distribution.value}",
-        }
-    )
+    return json.dumps({"distribution": distribution.value})
 
 
-def detect_swarming_behavior(image_url: str) -> str:
-    """Mock detection of swarming behavior."""
-    return json.dumps(
-        {
-            "image_url_processed": image_url,
-            "is_swarming": True,
-            "confidence": 0.85,
-        }
-    )
-
-
-def average_colony_rgb(image_url: str, colony_area_description: str) -> str:
+def average_colony_rgb(color: str) -> str:
     """Return a mocked average RGB value for colonies on the plate."""
-    avg_rgb = (210, 180, 140)
     return json.dumps(
         {
-            "image_url_processed": image_url,
-            "colony_area_analyzed": colony_area_description,
-            "average_rgb": avg_rgb,
+            "color": color,
         }
     )
 
 
-def infer_origin_hypothesis(distribution_type: str, morphotype_description: str) -> str:
+def infer_origin_hypothesis(origin: str) -> str:
     """Infer colony origin hypothesis from distribution and morphotype."""
-    hypothesis = ColonyOriginHypothesis.DIRECT_INOCULATION
-    if (
-        distribution_type == SpatialDistributionType.CLUSTERED
-        and "mucoid" in morphotype_description
-    ):
-        hypothesis = ColonyOriginHypothesis.MIXED_INOCULUM
     return json.dumps(
         {
-            "distribution_input": distribution_type,
-            "morphotype_input": morphotype_description,
-            "origin_hypothesis": hypothesis.value,
+            "origin_hypothesis": origin.value,
         }
     )
 

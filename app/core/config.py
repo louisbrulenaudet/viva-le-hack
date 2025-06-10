@@ -265,7 +265,6 @@ class Settings(BaseSettings):
 
         return self
 
-
     @model_validator(mode="after")
     def initialize_cloudflare_client(self) -> Settings:
         """

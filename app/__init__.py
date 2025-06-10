@@ -12,6 +12,7 @@ def get_app() -> FastAPI:
 
     return app
 
+
 try:  # Optional: allow tests to run without heavy deps
     from app.core.completion import CompletionModel
 except Exception:  # pragma: no cover - safe fallback

@@ -45,6 +45,9 @@ colony_analyzer: |-
   6. Diversity Assessment - Use compute_shannon_index for multiple colony types
   7. Origin Hypothesis - Use infer_origin_hypothesis to integrate findings
 
+  The results of the tool calling is this :
+  {{tool_results|safe}}
+
   Return analysis as JSON:
   {
     "visual_observations": {
@@ -89,4 +92,16 @@ colony_analyzer: |-
     }
   }
 
-  Important: Always provide image URL when calling functions. Be specific in context parameters. Return ONLY valid JSON with no additional text. Use null for missing data.
+  Important: Always provide image URL when calling functions. Be specific in context parameters. Return ONLY valid JSON with no additional text. Use null for missing data. We want you to be very exhaustive.
+
+colony_report_writer: |-
+  **Role:** You are a meticulous technical writer tasked with creating a comprehensive report.
+  **Objective:** Summarize the analytical results provided in JSON format into a clear, well-structured HTML document suitable for email integration.
+  **Output requirements:** Return only the HTML content, without style elements, code fences, or extra commentary.
+
+  **Formatting guidelines:**
+  1. Start with an <h1> heading using the 'title' value.
+  2. Present key findings in distinct <h2> sections.
+  3. Use <ul>, <ol>, or <table> elements when beneficial.
+  4. Keep the language concise and technical.
+  5. Do not mention the JSON input or these instructions.

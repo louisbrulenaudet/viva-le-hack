@@ -69,6 +69,23 @@ class ColonyOriginHypothesis(enum.StrEnum):
     TECHNICAL_ERROR = "technical_error"
 
 
+class ColonyColor(enum.StrEnum):
+    WHITE = "white"
+    CREAM = "cream"
+    YELLOW = "yellow"
+    ORANGE = "orange"
+    RED = "red"
+    PINK = "pink"
+    PURPLE = "purple"
+    BLUE = "blue"
+    GREEN = "green"
+    BROWN = "brown"
+    BLACK = "black"
+    GRAY = "gray"
+    TRANSLUCENT = "translucent"
+    IRIDESCENT = "iridescent"
+
+
 class ErrorCodes(enum.StrEnum):
     COMPLETION_ERROR = "COMPLETION_ERROR"
     TOOL_REGISTRY_NOT_FOUND = "TOOL_REGISTRY_NOT_FOUND"

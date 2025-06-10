@@ -12,8 +12,6 @@ from app.core.callbacks import ReviewCallback
 from app.core.completion import CompletionModel
 from app.core.config import settings
 from app.models.models import SignDetectors
-from app.services.plate_analysis import analyze_bacterial_plate
-from app.utils.encoders import ImageEncoder
 from app.utils.image_processing import correct_inversion
 
 router = APIRouter(tags=["sync"])
@@ -72,60 +70,59 @@ async def completion(file: UploadFile = File(...)) -> dict:
     image.save(buf, format="PNG")
     image_b64 = base64.b64encode(buf.getvalue()).decode()
 
-    # prompt = settings.get_rendered_prompt("sign_detector")
-
-    # model = CompletionModel(token=settings.openai_api_key)
-    # callbacks_or_tools = model.generate(
-    #     "",
-    #     images=[f"data:{file.content_type};base64,{image_b64}"],
-    #     response_format=SignDetectors,
-    #     system_instruction=prompt,
-    # )
-
-    # for element in callbacks_or_tools.data.get("signs", []):
-    #     if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
-    #         callback_name = element.get("name")
-    #         if callback_name in CALLBACKS:
-    #             parameters = element.get("parameters", {})
-    #             parameters.update(
-    #                 {
-    #                     "data": "Ceci est le contenu d'un test.",
-    #                 }
-    #             )
-
-    #             callback = CALLBACKS[callback_name]
-    #             result = callback.execute(**parameters)
-    #         else:
-    #             raise HTTPException(
-    #                 status_code=400,
-    #                 detail=f"Callback {callback_name} not found.",
-    #             )
-    #     else:
-    #         # Optionally log or skip non-dict elements
-    #         continue
-
-
-    prompt = settings.get_rendered_prompt("colony_analyzer")
-
     model = CompletionModel(token=settings.openai_api_key)
-
     analysis = model.generate(
-        prompt,
+        "",
         images=[f"data:{file.content_type};base64,{image_b64}"],
-        system_instruction=prompt,
+        system_instruction="Use the following tools to analyze the bacterial plate.",
         tools=tools,
     )
 
+    analysis = model.generate(
+        "Write a detailed report about the bacterial plate analysis.",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        system_instruction=settings.get_rendered_prompt(
+            "colony_analyzer",
+            context={
+                "tool_results": str(analysis.data),
+            },
+        ),
+    )
 
-    print(analysis.data)
+    analysis_to_markdown = model.generate(
+        f"Write a detailed report about the bacterial plate analysis. This is the analysis result: {analysis.data}",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        system_instruction=settings.get_rendered_prompt(
+            "colony_report_writer",
+        ),
+    )
 
-    return {"data": analysis.data}
+    prompt = settings.get_rendered_prompt("sign_detector")
 
+    model = CompletionModel(token=settings.openai_api_key)
+    callbacks_or_tools = model.generate(
+        "",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        response_format=SignDetectors,
+        system_instruction=prompt,
+    )
 
-    # settings.r2_client.upload_fileobj(  # type: ignore
-    #     Fileobj=BytesIO(json.dumps(...).encode("utf-8")),
-    #     Bucket=
-    # "openai-viva-le-hack",
-    #     Key="/name_of_the_file.json",
-    #     ExtraArgs={"ContentType": "application/json"},
-    # )
+    for element in callbacks_or_tools.data.get("signs", []):
+        if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
+            callback_name = element.get("name")
+            if callback_name in CALLBACKS:
+                parameters = element.get("parameters", {})
+                parameters.update({"data": analysis_to_markdown.data})
+
+                callback = CALLBACKS[callback_name]
+                _ = callback.execute(**parameters)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Callback {callback_name} not found.",
+                )
+        else:
+            # Optionally log or skip non-dict elements
+            continue
+
+    return {"data": analysis_to_markdown.data}

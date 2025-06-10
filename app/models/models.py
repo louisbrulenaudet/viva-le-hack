@@ -19,6 +19,7 @@ __all__: list[str] = [
     "QueryFilter",
 ]
 
+
 class Completion(BaseModel):
     data: str | list[Any] | dict[str, Any] | None = Field(
         default=None,
@@ -63,11 +64,17 @@ class SignDetector(BaseModel):
 
     type: Actions = Field(description="Type of the detected object: callback or tools")
     name: Callbacks = Field(description="First line inside the shape")
-    parameters: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
+    parameters: dict[str, str] = Field(
+        default_factory=dict, description="Key/value pairs from the remaining lines"
+    )
 
 
 class SignDetectors(BaseModel):
     signs: list[SignDetector]
+
+
+class AnalysisResult(BaseModel):
+    analysis: dict
 
 
 class ColonyGroup(BaseModel):
