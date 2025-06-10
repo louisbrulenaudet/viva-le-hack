@@ -44,21 +44,36 @@ class CompletionModel:
         images: list | None = None,
         response_format: type[BaseModel] | None = None,
     ) -> Completion | None:
-        """
-        Generates a completion using the specified model and prompt.
+        """Generate a completion using OpenAI's chat API."""
 
-        Args:
-            prompt (str): The input prompt for the model.
-            model_name (Models): The model to use for generation.
-            response_format (BaseModel | None): The format for the response.
-            system_instruction (str | None): The system instruction to guide the model.
-            thinking_budget (int | None): The budget for the model's thinking process.
-            reasoning_effort (str | None): Reasoning effort for Gemini models.
-            tools (list): Function calling tools.
-            tool_choice (str | None): Tool choice for function calling.
-            images (list): List of image dicts for multimodal input.
+        messages: list[dict] = [
+            {"role": "system", "content": system_instruction or self.system_instruction}
+        ]
 
-        Returns:
-            Completion | None: The generated completion object.
-        """
-        pass
+        if images:
+            user_content: list[dict] = []
+            if prompt:
+                user_content.append({"type": "text", "text": prompt})
+            for img in images:
+                user_content.append({"type": "image_url", "image_url": img})
+            messages.append({"role": "user", "content": user_content})
+        else:
+            messages.append({"role": "user", "content": prompt})
+
+        params = {
+            "model": model_name.value,
+            "messages": messages,
+            "temperature": self.temperature,
+        }
+
+        if response_format is not None:
+            params["response_format"] = {"type": "json_object"}
+
+        response = self.client.chat.completions.create(**params)
+        content: str = response.choices[0].message.content or ""
+
+        if response_format is not None:
+            parsed = response_format.model_validate_json(content)
+            return Completion(data=parsed.model_dump())
+
+        return Completion(data=content)
