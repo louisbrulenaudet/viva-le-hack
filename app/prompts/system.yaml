@@ -1,0 +1,2 @@
+example: |-
+  This is the placeholder system prompt with dynamic variables. Variables need to be used like this : {{name|safe}}.
