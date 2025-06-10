@@ -60,9 +60,9 @@ async def completion(file: UploadFile = File(...)) -> dict:
     # print(b64_img)
 
 
-    # params = {
-    #     "username": "thibaultguillemat",
-    # }
+    params = {
+        "username": "thibaultguillemat",
+    }
 
     params.update(
         {
