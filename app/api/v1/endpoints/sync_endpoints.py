@@ -73,14 +73,27 @@ async def completion(file: UploadFile = File(...)) -> dict:
     image_b64 = base64.b64encode(buf.getvalue()).decode()
 
     prompt = settings.get_rendered_prompt("sign_detector")
-
     model = CompletionModel(token=settings.openai_api_key)
+    result = model.generate(
+        "",
+        images=[f"data:{file.content_type};base64,{image_b64}"],
+        system_instruction=prompt,
+    )
+    print(result)
+
+
+    # Collect all callback values from the Callbacks enum
+    callback_values = [cb.value for cb in Callbacks]
+    actions_values = [action.value for action in Actions]
+
     callbacks_or_tools = model.generate(
         "",
         images=[f"data:{file.content_type};base64,{image_b64}"],
         response_format=SignDetectors,
         system_instruction=prompt,
     )
+
+    print(result)
 
     for element in callbacks_or_tools.data.get("signs", []):
         if isinstance(element, dict) and element.get("type") == Actions.CALLBACK:
