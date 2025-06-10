@@ -6,6 +6,7 @@ import tomllib
 import boto3
 import jinja2
 import yaml
+from cloudflare import Cloudflare
 from markupsafe import Markup
 from openai import Client
 from pydantic import Field, model_validator
@@ -70,6 +71,7 @@ class Settings(BaseSettings):
     cloudflare_account_id: str | None = Field(
         default=None, alias="CLOUDFLARE_ACCOUNT_ID"
     )
+    cloudflare_client: Cloudflare | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -262,7 +264,38 @@ class Settings(BaseSettings):
             )
 
         return self
-        
+
+
+    @model_validator(mode="after")
+    def initialize_cloudflare_client(self) -> Settings:
+        """
+        Initializes the Cloudflare client for database operations using provided credentials.
+
+        This validator runs after model initialization. If all required Cloudflare credentials are present, it creates a Cloudflare client instance and stores it in the cloudflare_client attribute.
+
+        Returns:
+            Settings: The updated Settings instance with the Cloudflare client initialized (if credentials are present).
+
+        Edge Cases:
+            - If any credential is missing, the client is not initialized and cloudflare_client remains None.
+            - The client is used for database operations in the application.
+
+        Integration:
+            - Enables interaction with Cloudflare's D1 database service.
+
+        Example:
+            ```
+            settings = Settings()
+            if settings.cloudflare_client:
+                # Use the client for database operations
+                pass
+            ```
+        """
+        if self.cloudflare_api_token:
+            self.cloudflare_client = Cloudflare(
+                api_token=self.cloudflare_api_token,
+            )
+        return self
 
     @model_validator(mode="after")
     def initialize_r2_client(self) -> Settings:

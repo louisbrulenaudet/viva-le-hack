@@ -6,6 +6,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
 from app._enums import ImageMimeTypes
+from app.core.callbacks import ReviewCallback
 from app.core.config import settings
 from app.utils.encoders import ImageEncoder
 
@@ -52,11 +53,29 @@ async def completion(file: UploadFile = File(...)) -> dict:
     ]:
         raise HTTPException(status_code=400, detail="Image format not supported.")
 
-    contents = await file.read()
-    image = Image.open(io.BytesIO(contents))
-    b64_img: str = ImageEncoder().encode_image_to_base64(image)
+    # contents = await file.read()
+    # image = Image.open(io.BytesIO(contents))
+    # b64_img: str = ImageEncoder().encode_image_to_base64(image)
 
-    print(b64_img)
+    # print(b64_img)
+
+
+    # params = {
+    #     "username": "thibaultguillemat",
+    # }
+
+    params.update(
+        {
+            "data": "Ceci est le contenu d'un test.",
+        }
+    )
+
+    ReviewCallback().execute(
+        **params
+    )
+
+
+
 
     # settings.r2_client.upload_fileobj(  # type: ignore
     #     Fileobj=BytesIO(json.dumps(...).encode("utf-8")),
