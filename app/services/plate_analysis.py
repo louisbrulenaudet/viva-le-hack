@@ -5,28 +5,39 @@ from typing import Any
 import openai
 from PIL import Image
 
-from app.models import models
+from app.models import temp_models
 from app.utils.encoders import ImageEncoder
 
 
-def analyze_bacterial_plate(image: Image.Image) -> models.BacterialPlateAnalysis:
+def analyze_bacterial_plate(image: Image.Image) -> temp_models.BacterialPlateAnalysis:
     """Analyze a bacterial plate image using OpenAI vision and predefined tools."""
     image_b64 = ImageEncoder.encode_image_to_base64(image)
 
-    schema_fields = models.BacterialPlateAnalysis.model_json_schema()["properties"].keys()
-    schema_description = "\n".join(
-        [
-            f"- {field}: {models.BacterialPlateAnalysis.model_fields[field].description or 'provide value'}"
-            for field in schema_fields
-            if field != "tool_interactions"
-        ]
-    )
-
     prompt_text = (
-        "You are an expert microbiologist analyzing an agar plate image. "
-        "Provide a comprehensive analysis in JSON format according to the following schema. "
-        "Use tools if needed. Final response must be a single JSON object.\n\n"
-        f"Schema:\n{schema_description}"
+        "**Role:** You are an advanced microbiology assistant specialised in agar "
+        "plate diagnostics.\n"
+        "**Core Mission:** Analyse uploaded plate photographs using your vision "
+        "capabilities and the available tools. Return a complete JSON object that "
+        "encodes all requested observations.\n"
+        "**Output requirements:** Only return a single JSON object with plain text "
+        "values. Do not include code fences or explanatory prose. Populate every "
+        "field, setting missing data to null.\n\n"
+        "Schema fields:\n"
+        "- image_id: unique identifier you assign.\n"
+        "- analysis_timestamp: ISO 8601 timestamp of analysis.\n"
+        "- sample_info: {substrate, origin, incubation_hours, camera_distance_cm}.\n"
+        "- cfu_analysis: {estimated_total_cfu, cfu_per_ml, detection_confidence, "
+        "colony_groups}. Each colony_group has morphotype, count, probable_identity, "
+        "pigment, and diameter_range_mm.\n"
+        "- diagnostic_hint: brief note on notable traits or likely organism.\n"
+        "- report_quality: {image_quality_score, lighting_conditions, detection_completeness}.\n"
+        "- metadata: {model_version, processed_by, review_recommended}.\n"
+        "- spatial_distribution_assessment: CLUSTERED | UNIFORM | RANDOM.\n"
+        "- origin_hypothesis_assessment: MIXED_INOCULUM | DIRECT_INOCULATION.\n"
+        "- swarming_detected: boolean.\n"
+        "- dominant_colony_average_rgb: [r,g,b] or null.\n"
+        "- shannon_diversity_index: float or null.\n"
+        "- tool_interactions: list of tool call logs or null."
     )
 
     messages = [
@@ -42,7 +53,7 @@ def analyze_bacterial_plate(image: Image.Image) -> models.BacterialPlateAnalysis
     response = openai.chat.completions.create(
         model="gpt-4-vision-preview",
         messages=messages,
-        tools=models.tools,
+        tools=temp_models.tools,
         tool_choice="auto",
         max_tokens=2000,
         temperature=0.2,
@@ -56,7 +67,9 @@ def analyze_bacterial_plate(image: Image.Image) -> models.BacterialPlateAnalysis
         messages.append(response_message)
         for tool_call in tool_calls:
             function_name = tool_call.function.name
-            function_response_content = models.execute_tool_call(tool_call, image_b64)
+            function_response_content = temp_models.execute_tool_call(
+                tool_call, image_b64
+            )
             messages.append(
                 {
                     "tool_call_id": tool_call.id,
@@ -109,7 +122,7 @@ def analyze_bacterial_plate(image: Image.Image) -> models.BacterialPlateAnalysis
                 "arguments": json.dumps(shannon_tool_args),
             }
         }
-        shannon_response = models.execute_tool_call(shannon_tool_call, image_b64)
+        shannon_response = temp_models.execute_tool_call(shannon_tool_call, image_b64)
         parsed_shannon = json.loads(shannon_response)
         parsed_json["shannon_diversity_index"] = parsed_shannon.get("shannon_index")
         recorded_tool_interactions.append(
@@ -133,4 +146,4 @@ def analyze_bacterial_plate(image: Image.Image) -> models.BacterialPlateAnalysis
         if key not in parsed_json:
             parsed_json[key] = None
 
-    return models.BacterialPlateAnalysis(**parsed_json)
+    return temp_models.BacterialPlateAnalysis(**parsed_json)
