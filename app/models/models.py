@@ -1,12 +1,13 @@
+from datetime import datetime
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app._enums import Callbacks
+from app._enums import ColonyOriginHypothesis, SpatialDistributionType, Callbacks
 
 __all__: list[str] = [
     "Completion",
-    "RoutingResponse",
     "SignDetector",
     "CallBackExecutionResult",
     "FilterElement",
@@ -53,12 +54,10 @@ class QueryFilter(BaseModel):
     group_by: list[str] = Field(default_factory=list)
 
 
-from enum import Enum
-
-
 class SignDetectorType(str, Enum):
     callback = "callback"
     tools = "tools"
+
 
 class SignDetector(BaseModel):
     """Model returned by the SignDetector prompt."""
@@ -66,3 +65,53 @@ class SignDetector(BaseModel):
     type: SignDetectorType = Field(description="Type of the detected object: callback or tools")
     name: Callbacks = Field(description="First line inside the shape")
     ne: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
+
+
+class ColonyGroup(BaseModel):
+    morphotype: str
+    count: int
+    probable_identity: str | None = None
+    pigment: str | None = None
+    diameter_range_mm: tuple[float, float] | None = None
+
+
+class SampleInfo(BaseModel):
+    substrate: str
+    origin: str
+    incubation_hours: int
+    camera_distance_cm: float
+
+
+class CFUAnalysis(BaseModel):
+    estimated_total_cfu: int
+    cfu_per_ml: float | None = None
+    detection_confidence: float
+    colony_groups: list[ColonyGroup] = Field(default_factory=list)
+
+
+class ReportQuality(BaseModel):
+    image_quality_score: float
+    lighting_conditions: str
+    detection_completeness: str
+
+
+class Metadata(BaseModel):
+    model_version: str
+    processed_by: str
+    review_recommended: bool
+
+
+class BacterialPlateAnalysis(BaseModel):
+    image_id: str
+    analysis_timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+    sample_info: SampleInfo
+    cfu_analysis: CFUAnalysis
+    diagnostic_hint: str
+    report_quality: ReportQuality
+    metadata: Metadata
+    spatial_distribution_assessment: SpatialDistributionType | None = None
+    origin_hypothesis_assessment: ColonyOriginHypothesis | None = None
+    swarming_detected: bool | None = None
+    dominant_colony_average_rgb: tuple[int, int, int] | None = None
+    shannon_diversity_index: float | None = None
+    tool_interactions: list[dict] | None = None

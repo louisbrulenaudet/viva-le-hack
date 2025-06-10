@@ -1,7 +1,5 @@
 import enum
 
-from app.models.models import QueryFilter
-
 __all__: list[str] = [
     "ImageMimeTypes",
     "Models",
@@ -9,7 +7,6 @@ __all__: list[str] = [
     "ObjectTypes",
     "Callbacks",
     "DBTableNames",
-    "MCPDescriptions",
 ]
 
 
@@ -26,6 +23,45 @@ class Callbacks(enum.StrEnum):
 
 class Models(enum.StrEnum):
     GPT_4_1_MINI = "gpt-4.1-mini"
+
+
+class SpatialDistributionType(enum.StrEnum):
+    ISOLATED = "isolated"
+    CLUSTERED = "clustered"
+    CONFLUENT = "confluent"
+    CENTRALLY_LOCATED = "centrally_located"
+    PERIPHERAL = "peripheral"
+    EVENLY_DISTRIBUTED = "evenly_distributed"
+    RADIAL = "radial"
+    SPOT_INOCULATED = "spot_inoculated"
+    SWARMING = "swarming"
+    ZONAL = "zonal"
+    TRAILING = "trailing"
+    DISCONTINUOUS = "discontinuous"
+    PUNCTATE = "punctate"
+    FILAMENTOUS_EDGE = "filamentous_edge"
+    SPREADING = "spreading"
+    LAYERED = "layered"
+    INHIBITION_ZONE = "inhibition_zone"
+    BIAXIAL = "biaxial"
+
+
+class ColonyOriginHypothesis(enum.StrEnum):
+    DIRECT_INOCULATION = "direct_inoculation"
+    AIRBORNE_CONTAMINATION = "airborne_contamination"
+    MOTILE_SPREAD = "motile_spread"
+    EDGE_EFFECT = "edge_effect"
+    CONTACT_TRANSFER = "contact_transfer"
+    LIQUID_OVERSPILL = "liquid_overspill"
+    DROPLET_IMPACT = "droplet_impact"
+    BIOFILM_FRAGMENT = "biofilm_fragment"
+    OVERNIGHT_SWARM = "overnight_swarm"
+    ANTIBIOTIC_INHIBITION = "antibiotic_inhibition"
+    MIXED_INOCULUM = "mixed_inoculum"
+    RESIDUAL_MEDIA_EFFECT = "residual_media_effect"
+    CONDENSATION_ARTIFACT = "condensation_artifact"
+    FUNGAL_OVERGROWTH = "fungal_overgrowth"
+    TECHNICAL_ERROR = "technical_error"
 
 
 class ErrorCodes(enum.StrEnum):
@@ -45,12 +81,6 @@ class ObjectTypes(enum.StrEnum):
 
 class DBTableNames(enum.StrEnum):
     TEAM = "team"
-
-
-class MCPDescriptions(enum.StrEnum):
-    QUERY_DB = f"""Query the Cloudflare D1 database and return data as a string. Use this tool after getting the list of tables or schema. The request should adhere to the pydantic schema below. {QueryFilter.model_json_schema()}"""
-    GET_DATABASE_TABLES = """Get the list of tables in the Cloudflare D1 database. Use this tool before querying the database."""
-    GET_DATABASE_SCHEMA = """Get the schema of a specific table in the Cloudflare D1 database. Use this tool before querying the database."""
 
 
 class EmailContents(enum.StrEnum):
