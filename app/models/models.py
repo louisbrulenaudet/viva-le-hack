@@ -21,10 +21,10 @@ class Completion(BaseModel):
     )
 
 
-class AgentExecutionResult(BaseModel):
+class CallBackExecutionResult(BaseModel):
     data: str | list[Any] | dict[str, Any] | None = Field(
         default=None,
-        description="The result data produced by the agent.",
+        description="The result data produced by the callback.",
     )
 
 

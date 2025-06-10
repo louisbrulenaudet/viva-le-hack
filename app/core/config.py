@@ -34,6 +34,11 @@ class Settings(BaseSettings):
         default_factory=dict,
         description="A dictionary of available system prompt templates, keyed by name.",
     )
+    resend_api_key: str | None = Field(
+        default=None,
+        alias="RESEND_API_KEY",
+        description="API key for Resend service, used for sending emails.",
+    )
     llm_client: Client | None = Field(
         default=None,
         description="The LLM client instance used for generating completions.",
@@ -257,6 +262,7 @@ class Settings(BaseSettings):
             )
 
         return self
+        
 
     @model_validator(mode="after")
     def initialize_r2_client(self) -> Settings:
