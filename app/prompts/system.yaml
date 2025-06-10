@@ -10,6 +10,7 @@ sign_detector: |-
   For every shape you detect, return a JSON object in the following form:
 
   {
+    "type": "<callback|tools>",
     "shape": "<rectangle|round>",
     "name": "<callback name from the first line>",
     "ne": { "<key1>": "<value1>", "<key2>": "<value2>", ... }

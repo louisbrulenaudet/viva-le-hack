@@ -53,9 +53,15 @@ class QueryFilter(BaseModel):
     group_by: list[str] = Field(default_factory=list)
 
 
+from enum import Enum
+
+class SignDetectorType(str, Enum):
+    callback = "callback"
+    tools = "tools"
+
 class SignDetector(BaseModel):
     """Model returned by the SignDetector prompt."""
 
-    shape: str = Field(description="Detected shape: rectangle or round")
+    type: SignDetectorType = Field(description="Type of the detected object: callback or tools")
     name: str = Field(description="First line inside the shape")
     ne: dict[str, str] = Field(default_factory=dict, description="Key/value pairs from the remaining lines")
