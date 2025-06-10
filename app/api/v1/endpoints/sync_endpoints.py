@@ -7,13 +7,20 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from PIL import Image
 
 from app._enums import ImageMimeTypes
-from app.core.completion import CompletionModel
 from app.core.callbacks import ReviewCallback
+from app.core.completion import CompletionModel
 from app.core.config import settings
 from app.models.models import SignDetector
+from app.services.plate_analysis import analyze_bacterial_plate
+from app.utils.encoders import ImageEncoder
 from app.utils.image_processing import correct_inversion
 
 router = APIRouter(tags=["sync"])
+
+
+CALLBACKS: dict[str, ReviewCallback] = {
+    "review": ReviewCallback(),
+}
 
 
 @router.get("/ping", response_model=dict, tags=["Health"])
@@ -74,19 +81,19 @@ async def completion(file: UploadFile = File(...)) -> dict:
         system_instruction=prompt,
     )
 
-    params = {
-        "username": "thibaultguillemat",
-    }
+    # params = {
+    #     "username": "thibaultguillemat",
+    # }
 
-    params.update(
-        {
-            "data": "Ceci est le contenu d'un test.",
-        }
-    )
+    # params.update(
+    #     {
+    #         "data": "Ceci est le contenu d'un test.",
+    #     }
+    # )
 
-    ReviewCallback().execute(
-        **params
-    )
+    # ReviewCallback().execute(
+    #     **params
+    # )
 
     return {"data": result.data}
 
