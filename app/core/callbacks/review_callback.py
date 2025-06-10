@@ -4,6 +4,7 @@ from app._enums import Callbacks, EmailContents
 from app.core.callbacks.base import Callback
 from app.core.config import settings
 from app.models.models import CallBackExecutionResult, FilterElement, QueryFilter
+from app.services.fuzzy_match import fuzzy_find_team_member
 from app.utils.sql import (
     SQLiteSQLGenerator,
 )
@@ -41,32 +42,13 @@ class ReviewCallback(Callback):
         Returns:
             CallBackExecutionResult: The result of the callback execution.
         """
-        user = (
-            settings.cloudflare_client.d1.database.query(
-                database_id=settings.cloudflare_db_id,
-                account_id=settings.cloudflare_account_id,
-                sql=SQLiteSQLGenerator.compile(
-                    QueryFilter(
-                        base_table="team",
-                        fields=["email"],
-                        filters=[
-                            FilterElement(
-                                field="username",
-                                operator="=",
-                                value=kwargs.get("username", ""),
-                            ),
-                        ],
-                        limit=1,
-                    )
-                ),
-            )
-            .result[0]
-            .results
-        )
+
+        ocred_username: str = kwargs["ne"].get("Name", "") # type: ignore
+        matched_user: dict = fuzzy_find_team_member(ocred_username) # type: ignore
 
         params: resend.Emails.SendParams = {
             "from": "Laboratory <contact@louisbrulenaudet.com>",
-            "to": [user[0].get("email", "contact@louisbrulenaudet.com"), "louisbrulenaudet@icloud.com"],
+            "to": [matched_user.get("email", "contact@louisbrulenaudet.com"), "louisbrulenaudet@icloud.com"],
             "subject": "A new review request has been assigned to you",
             "html": EmailContents.REVIEW_REQUEST.format(
                 data=kwargs.get("data", ""),

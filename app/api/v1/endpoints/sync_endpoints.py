@@ -81,18 +81,8 @@ async def completion(file: UploadFile = File(...)) -> dict:
         system_instruction=prompt,
     )
 
-    # params = {
-    #     "username": "thibaultguillemat",
-    # }
-
-    # params.update(
-    #     {
-    #         "data": "Ceci est le contenu d'un test.",
-    #     }
-    # )
-
     # ReviewCallback().execute(
-    #     **params
+    #     **result.data
     # )
 
     return {"data": result.data}
